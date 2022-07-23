@@ -1,0 +1,16 @@
+<div>
+  <div
+    *ngFor="let player of players"
+  >
+    <!-- <p>{{ player.name }}</p> -->
+    <p>{{ player.key }}</p>
+    <div
+      *ngFor="let c of player.castaways"
+    >
+      <span>{{ c }}</span>
+      <!-- <p> {{ }}</p> -->
+    </div>
+    <p>{{ player.points }} points</p>
+</div>
+<table mat-table [dataSource]="players"></table>
+</div>
