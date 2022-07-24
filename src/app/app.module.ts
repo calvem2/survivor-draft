@@ -13,13 +13,21 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import { FormsModule } from '@angular/forms';
+import { PaginationModule } from 'ngx-bootstrap/pagination'
 
 import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
+import { ScoretrackerComponent } from './components/weekly-scoring/scoretracker/scoretracker.component';
+import { NumberInputComponent } from './components/weekly-scoring/scoretracker/number-input/number-input.component';
+import { WeeklyScoringComponent } from './components/weekly-scoring/weekly-scoring.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LeaderboardComponent
+    LeaderboardComponent,
+    ScoretrackerComponent,
+    NumberInputComponent,
+    WeeklyScoringComponent
   ],
   imports: [
     BrowserModule,
@@ -31,7 +39,9 @@ import { LeaderboardComponent } from './components/leaderboard/leaderboard.compo
     AngularFireDatabaseModule,
     BrowserAnimationsModule,
     MatTableModule,
-    MatSortModule
+    MatSortModule,
+    FormsModule,
+    PaginationModule
   ],
   providers: [],
   bootstrap: [AppComponent]
