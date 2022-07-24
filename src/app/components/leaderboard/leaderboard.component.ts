@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PlayersService } from 'src/app/services/players.service';
 import { combineLatestWith } from 'rxjs';
 
-import Castaway from 'src/app/models/Castaway';
+import { Castaway, PointRecord} from 'src/app/models/Castaway';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import Player from 'src/app/models/Player';
 
@@ -49,15 +49,21 @@ export class LeaderboardComponent implements OnInit {
   getTribeScore(tribe: string[], castaways: Castaway[]): number {
     // get player's tribe
     const tribeInfo = this.getTribe(tribe, castaways);
-
-    // calculate score for fantasy tribe
     return (
-      tribeInfo.reduce((totalScore: any, currCastaway: any) => {
-        // sum points for the current castaway
-        let currCastScore = currCastaway["points"].reduce((castScore: any, currPtRecord: any) => {
-          return castScore + currPtRecord["pts"]
-        }, 0)
-        return totalScore += currCastScore
+      // calculate score for castaways on tribe
+      tribeInfo.reduce((totalScore: number, currCastaway: Castaway) => {
+        // extract array of pt/multiplier info for current castaway
+        let castPointInfo: PointRecord[] = Object.values(currCastaway["points"])
+          .reduce((ptRecords: any, currActionRecord: any) => {
+            return [...ptRecords, ...Object.values(currActionRecord)];
+          }, []);
+
+        return totalScore += (
+          // sum up points for curr castaway using pt values and multipliers
+          castPointInfo.reduce((score: number, currPtRecord: PointRecord ) => {
+            return score += currPtRecord.pts * currPtRecord.multiplier;
+          }, 0)
+        )
       }, 0)
     )
   }

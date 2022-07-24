@@ -1,4 +1,4 @@
-import Castaway from "./Castaway";
+import { Castaway } from "./Castaway";
 
 export default interface Player {
   name: string;

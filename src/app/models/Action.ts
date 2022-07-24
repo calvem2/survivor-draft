@@ -1,4 +1,4 @@
 export default interface Action {
-  name: string;
+  action: string;
   pts: number;
 }
