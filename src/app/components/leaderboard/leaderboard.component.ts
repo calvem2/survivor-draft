@@ -1,96 +1,73 @@
 import { Component, OnInit } from '@angular/core';
 import { PlayersService } from 'src/app/services/players.service';
-import Player from 'src/app/models/Player';
-import { map } from 'rxjs';
-import Castaway from 'src/app/models/Castaway';
-import { CastawaysService } from 'src/app/services/castaways.service';
-import Points from 'src/app/models/Points';
+import { combineLatestWith } from 'rxjs';
 
+import Castaway from 'src/app/models/Castaway';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import Player from 'src/app/models/Player';
 
 @Component({
   selector: 'app-leaderboard',
   templateUrl: './leaderboard.component.html',
-  styleUrls: ['./leaderboard.component.scss']
+  styleUrls: ['./leaderboard.component.scss'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
 })
 export class LeaderboardComponent implements OnInit {
-  players: any = [];
-  points: any = [];
+  players: any[] = [];
+  columnsToDisplay: string[] = ['rank', 'name', 'score'];
+  columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+  expandedElement: any;
 
-  constructor(
-    private playerService: PlayersService, 
-    private castawaysService: CastawaysService
-  ) { }
+  constructor(private playerService: PlayersService) { }
 
   ngOnInit(): void {
-    this.retrievePlayers();
-    // this.players.valueChanges.subscribe(changes => this.disableButton = false);
-    // this.retrieveCastaways();
-    // this.addTribes()
-    console.log(this.players)
-  }
-
-  retrievePlayers(): void {
-    this.playerService.getAll().snapshotChanges().pipe(
-      map(changes =>
-        changes.map(c =>
-          ({ key: c.payload.key, ...c.payload.val() })
-        )
+    const players$ = this.playerService.getPlayers();
+    const castaways$ = this.playerService.getCastaways();
+    
+    players$.pipe(
+        combineLatestWith(castaways$)
       )
-    ).subscribe(data => {
-      // this.addTribes()
-      this.players = data;
-      this.tallyPoints(data);
-      console.log(this.points)
-    })
+      .subscribe(([players, castaways]) => {
+        for (let p of players) {
+          p["score"] = this.getTribeScore(p.castaways, castaways);
+        }
+        this.players = this.addPlayerRank(players);
+        console.log(this.addPlayerRank(players));
+      })
   }
 
-
-  // addTribes(): void {
-  //   this.players = this.players.map((p: Player) => {
-  //     let tribe: any[] = [];
-  //     p["castaways"].forEach((castaway: string) => {
-  //       this.castawaysService.getCastaway(castaway).valueChanges()
-  //         .subscribe(data => {
-  //           tribe.push(data)
-  //         })
-        
-  //     })
-  //     p["tribe"] = tribe;
-  //     return p;
-  //   })
-  // }
-
-  tallyPoints(players: any): void {
-    // this.players = this.players.map((p: Player) => {
-    //   let points: number = 0;
-    //   p["tribe"]?.forEach((castaway: Castaway) => {
-    //     castaway["points"].forEach((p: Points) => {
-    //       points += p["pts"]
-    //     })
-    //   })
-    //   p["points"] = points;
-    //   return p;
-    // })
-
-    console.log("HI")
-    // let new_players = this.players;
-    for (let p of players) {
-      // console.log(p)
-      for (let c of p["castaways"]) {
-        console.log(typeof(this.castawaysService.getPoints(c).valueChanges()
-          .subscribe(data => {
-            // find the player in this.players and replace it
-            // p.points = dat /a;
-            let totalPts: number = 0;
-            for (let pointObj of data) {
-              totalPts += pointObj["pts"];
-            }
-            p["points"] = totalPts;
-            this.players[p.key] = p;
-            // this.points = this.points.push(data)
-          })))
-      }
-    }
+  getTribe(names: string[], castaways: Castaway[]): Castaway[] {
+    return castaways.filter(c => names.includes(c.name));
   }
 
+  getTribeScore(tribe: string[], castaways: Castaway[]): number {
+    // get player's tribe
+    const tribeInfo = this.getTribe(tribe, castaways);
+
+    // calculate score for fantasy tribe
+    return (
+      tribeInfo.reduce((totalScore: any, currCastaway: any) => {
+        // sum points for the current castaway
+        let currCastScore = currCastaway["points"].reduce((castScore: any, currPtRecord: any) => {
+          return castScore + currPtRecord["pts"]
+        }, 0)
+        return totalScore += currCastScore
+      }, 0)
+    )
+  }
+
+  addPlayerRank(players: any[]): any[] {
+    return (
+        players.sort((a: any, b: any) => b["score"]-a["score"]).map((p, i) => {
+          p['rank'] = i + 1;
+          return p;
+        })
+    )
+  }
 }

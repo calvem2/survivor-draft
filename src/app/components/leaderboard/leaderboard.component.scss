@@ -1,0 +1,39 @@
+table {
+  width: 100%;
+}
+
+.mat-column-rank {
+  width: 32px;
+  border-right: 1px solid currentColor;
+  padding-right: 24px;
+  text-align: center;
+}
+
+.mat-column-name {
+  padding-left: 24px;
+}
+
+tr.leaderboard-row:not(.expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.leaderboard-row:not(.expanded-row):active {
+  background: #efefef;
+}
+
+.player-detail-row {
+  height: 0;
+
+  td {
+    border-bottom-width: 0;
+
+    .player-detail {
+        overflow: hidden;
+        display: flex;
+      }
+  }
+}
+
+
+
+

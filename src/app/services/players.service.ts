@@ -1,19 +1,27 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, AngularFireDatabaseModule, AngularFireList } from '@angular/fire/compat/database';
+import { Observable } from 'rxjs';
 import Player from '../models/Player';
+import firebase from 'firebase/compat';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlayersService {
-  private dbPath: string = '/players';
-  players: AngularFireList<Player>;
+  players: Observable<any>;
+  castaways: Observable<any>;
 
   constructor(private db: AngularFireDatabase) {
-    this.players = db.list(this.dbPath);
+    this.players = db.list("/players").valueChanges();
+    // this.castaways = db.object("/castaways").valueChanges();
+    this.castaways = db.list("/castaways").valueChanges();
   }
 
-  getAll(): AngularFireList<Player> {
+  getPlayers(): Observable<any> {
     return this.players;
+  }
+
+  getCastaways(): Observable<any> {
+    return this.castaways;
   }
 }
